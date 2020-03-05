@@ -1,5 +1,6 @@
 package com.anthem.codec;
 
+import com.anthem.codec.cipher.KeyCipherProvider;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,12 +10,11 @@ import javax.crypto.CipherInputStream;
 import java.io.*;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 
 public class TestEncr {
 
     @Test
-    public void testEncr() throws InvalidKeyException, IOException, InvalidAlgorithmParameterException {
+    public void testEncr() throws IOException {
         final String MSG = "    Looking back on a childhood filled with events and memories, I find it rather " +
                 "difficult to pick one that leaves me with the fabled warm and fuzzy feelings. As the daughter of an " +
                 "Air Force major, I had the pleasure of traveling across America in many moving trips. I have visited" +
@@ -39,16 +39,19 @@ public class TestEncr {
         FileOutputStream fs = new FileOutputStream(fileName);
 
         EncryptionCodec outCodec = new EncryptionCodec();
-        Key k = outCodec.getSecretKey();
-        Cipher aes2 = outCodec.getAes();
+        KeyCipherProvider provider = outCodec.getProvider();
+        Cipher aes2 = provider.getCipher();
+
+        // Encrypt
         CompressionOutputStream out = outCodec.createOutputStream(fs);
         out.write(MSG.getBytes());
         out.flush();
         out.close();
 
         System.out.println(">>> ENCRYPTION Done!");
-        aes2.init(Cipher.DECRYPT_MODE, k, outCodec.getIvspec());
 
+        // decrypt
+        provider.decryptInit();
         FileInputStream fis = new FileInputStream(fileName);
         CipherInputStream in = new CipherInputStream(fis, aes2);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

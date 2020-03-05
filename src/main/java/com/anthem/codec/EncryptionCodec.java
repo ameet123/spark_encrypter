@@ -1,93 +1,61 @@
 package com.anthem.codec;
 
+import com.anthem.codec.cipher.AESNoPaddingProvider;
+import com.anthem.codec.cipher.KeyCipherProvider;
+import com.anthem.codec.config.EncrConstants;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 public class EncryptionCodec extends GzipCodec {
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionCodec.class);
-    private final String PROP_FILE = "application.properties";
-    private final String PASSWORD_KEY = "password";
-    private final String EXT_KEY = "extension";
     private String extension;
-    private Properties properties;
-    private SecretKeySpec secretKey;
     private String password;
-    private Cipher aes;
-    private IvParameterSpec ivspec;
+    private KeyCipherProvider provider;
 
     public EncryptionCodec() {
-        aes = null;
-        try {
-            aes = Cipher.getInstance("AES/CFB8/NoPadding");
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException("Err no such algorithm");
-        }
-        // read props
+        LOGGER.info(">>Loading properties");
         readProperties();
-        generateKey();
-    }
-
-    public SecretKeySpec getSecretKey() {
-        return secretKey;
+        LOGGER.info(">>Instantiating Key/Cipher provider based on provided password");
+        provider = new AESNoPaddingProvider(password);
+        LOGGER.info(">>Initialization completed.");
     }
 
     @Override
     public String getDefaultExtension() {
-        return super.getDefaultExtension();
+        return extension;
     }
 
     private void readProperties() {
-        properties = new Properties();
-        InputStream propertyStream = getClass().getClassLoader().getResourceAsStream(PROP_FILE);
+        Properties properties = new Properties();
+        InputStream propertyStream = getClass().getClassLoader().getResourceAsStream(EncrConstants.PROP_FILE);
         try {
             properties.load(propertyStream);
         } catch (IOException e) {
             LOGGER.error("ERR: Could not load property file", e);
             throw new RuntimeException(e);
         }
-        password = properties.getProperty(PASSWORD_KEY);
-        extension = properties.getProperty(EXT_KEY);
+        password = properties.getProperty(EncrConstants.PASSWORD_KEY);
+        extension = properties.getProperty(EncrConstants.EXT_KEY);
         LOGGER.info(">>Encrypted file extension:{}", extension);
     }
 
-    private void generateKey() {
-        byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        ivspec = new IvParameterSpec(iv);
-        secretKey = new SecretKeySpec(password.getBytes(), "AES");
-    }
-
-
-    public Cipher getAes() {
-        return aes;
-    }
-
-    public IvParameterSpec getIvspec() {
-        return ivspec;
+    public KeyCipherProvider getProvider() {
+        return provider;
     }
 
     @Override
     public CompressionOutputStream createOutputStream(OutputStream out) {
-        try {
-            aes.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
-        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-            throw new RuntimeException("invalid key", e);
-        }
-        CipherOutputStream cf = new CipherOutputStream(out, aes);
+        provider.encryptInit();
+
+        CipherOutputStream cf = new CipherOutputStream(out, provider.getCipher());
         return new NoopCompressionOutputStream(cf);
     }
 
