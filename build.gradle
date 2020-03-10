@@ -12,8 +12,10 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'org.apache.hadoop', name: 'hadoop-common', version: '2.6.5'
-    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
+    implementation('org.apache.hadoop:hadoop-common:2.6.5') {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
     implementation group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: '1.64'
     implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.64'
     implementation group: 'name.neuhalfen.projects.crypto.bouncycastle.openpgp', name: 'bouncy-gpg', version: '2.2.0'
