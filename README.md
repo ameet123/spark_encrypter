@@ -43,3 +43,7 @@ The solution leverages encryption of *OutputStream* in java using `CipherOutputS
   
 For PGP, the project makes use of `BouncyCastle` provider and a higher-level wrapper on it, `name.neuhalfen.projects.crypto.bouncycastle.openpgp`
 This wrapper makes it convenient and clean to expose an output stream from the encryption process, specifically for PGP.
+
+#### Encryption through Compression
+In order to plug the encryption into compression, the code uses a dummy `NoopCompressionOutputStream` class extending
+ from `CompressionOutputStream`, which simply writes the data without any compression.
