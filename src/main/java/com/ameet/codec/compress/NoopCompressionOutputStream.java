@@ -33,7 +33,7 @@ public class NoopCompressionOutputStream extends CompressionOutputStream {
     @Override
     public void finish() throws IOException {
         LOGGER.info(">>Finishing encryption thr' child mechanism.");
-        encryptDecrypt.terminate();
+//        encryptDecrypt.terminate();
     }
 
     @Override
@@ -44,12 +44,12 @@ public class NoopCompressionOutputStream extends CompressionOutputStream {
     @Override
     public void close() throws IOException {
         super.close();
-        encryptDecrypt.terminate();
+//        encryptDecrypt.terminate();
     }
 
     @Override
     public void flush() throws IOException {
         super.flush();
-        encryptDecrypt.flush();
+//        encryptDecrypt.flush();
     }
 }

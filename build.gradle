@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation('org.apache.hadoop:hadoop-common:2.6.5') {
+    compileOnly('org.apache.hadoop:hadoop-common:2.6.5') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
@@ -21,4 +21,12 @@ dependencies {
     implementation group: 'name.neuhalfen.projects.crypto.bouncycastle.openpgp', name: 'bouncy-gpg', version: '2.2.0'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+jar {
+    from {
+        (configurations.runtimeClasspath).collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+    }
 }

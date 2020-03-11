@@ -29,7 +29,7 @@ Based on this, the high level approach is as follows,
 The command to execute the encryption is summarized as follows,
 
 ```scala
-df.write.format("<file fmt>").option("codec", "org.ameet.codec.EncryptionCodec").save("<file path>")
+df.write.option("codec", "org.ameet.codec.EncryptionCodec").csv("<file path>")
 ```
 
 ### Technical Details
@@ -47,3 +47,8 @@ This wrapper makes it convenient and clean to expose an output stream from the e
 #### Encryption through Compression
 In order to plug the encryption into compression, the code uses a dummy `NoopCompressionOutputStream` class extending
  from `CompressionOutputStream`, which simply writes the data without any compression.
+ 
+ spark command:
+ ```shell script
+spark-shell --conf "spark.executor.extraJavaOptions='-Dlog4j.configuration=log4j.properties'" --driver-java-options "-Dlog4j.configuration=file:///C:/Users/ameet.chaubal/Documents/source/encrypter/log4j.properties" --jars .\build\libs\encrypter-0.3.jar
+```

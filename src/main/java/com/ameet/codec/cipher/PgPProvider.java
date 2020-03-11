@@ -1,7 +1,6 @@
 package com.ameet.codec.cipher;
 
 import com.ameet.codec.config.EncrConstants;
-import com.ameet.codec.util.EncUtil;
 import name.neuhalfen.projects.crypto.bouncycastle.openpgp.BouncyGPG;
 import name.neuhalfen.projects.crypto.bouncycastle.openpgp.keys.callbacks.KeyringConfigCallbacks;
 import name.neuhalfen.projects.crypto.bouncycastle.openpgp.keys.keyrings.InMemoryKeyring;
@@ -26,12 +25,14 @@ public class PgPProvider implements EncryptDecrypt {
     private String PUB_KEY_STR, PRIV_KEY_STR;
     private OutputStream outputStream;
     private InputStream inputStream;
-
+    private BufferedOutputStream bufferedOutputStream;
     public PgPProvider() {
         LOGGER.info(">> Recipient public key from file:{}", EncrConstants.pubKey);
-        PUB_KEY_STR = EncUtil.fileToString(EncrConstants.pubKey);
+//        PUB_KEY_STR = EncUtil.fileToString(EncrConstants.pubKey);
+        PUB_KEY_STR = EncrConstants.P_KEY;
         LOGGER.info(">> Recipient PRIVATE key from file:{}", EncrConstants.privKey);
-        PRIV_KEY_STR = EncUtil.fileToString(EncrConstants.privKey);
+//        PRIV_KEY_STR = EncUtil.fileToString(EncrConstants.privKey);
+        PRIV_KEY_STR = EncrConstants.PR_KEY;
         BouncyGPG.registerProvider();
     }
 
@@ -46,7 +47,7 @@ public class PgPProvider implements EncryptDecrypt {
 
     @Override
     public OutputStream cipherStream(OutputStream out) {
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(out);
+          bufferedOutputStream = new BufferedOutputStream(out);
         outputStream = null;
         try {
             outputStream = BouncyGPG
@@ -91,7 +92,9 @@ public class PgPProvider implements EncryptDecrypt {
     public void terminate() {
         try {
             outputStream.flush();
+            bufferedOutputStream.flush();
             outputStream.close();
+            bufferedOutputStream.close();
         } catch (IOException e) {
             LOGGER.error("ERR:Closing output stream", e);
         }
@@ -101,6 +104,7 @@ public class PgPProvider implements EncryptDecrypt {
     public void flush() {
         try {
             outputStream.flush();
+            bufferedOutputStream.flush();
         } catch (IOException e) {
             LOGGER.error("ERR:Flushing output stream", e);
         }
