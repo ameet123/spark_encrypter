@@ -1,8 +1,10 @@
-package com.anthem.codec;
+package com.ameet.codec;
 
-import com.anthem.codec.cipher.EncryptDecrypt;
-import com.anthem.codec.cipher.PgPProvider;
-import com.anthem.codec.compress.NoopCompressionOutputStream;
+import com.ameet.codec.cipher.PgPProvider;
+import com.ameet.codec.config.EncrConstants;
+import com.ameet.codec.cipher.AESNoPaddingProvider;
+import com.ameet.codec.cipher.EncryptDecrypt;
+import com.ameet.codec.compress.NoopCompressionOutputStream;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.slf4j.Logger;
@@ -18,8 +20,19 @@ public class EncryptionCodec extends GzipCodec {
     private EncryptDecrypt provider;
 
     public EncryptionCodec() {
-        LOGGER.info(">>Instantiating Key/Cipher provider based on provided password");
-        provider = new PgPProvider();
+        switch (EncrConstants.encryptionStrategy) {
+            case "PgPProvider":
+                LOGGER.info(">>Instantiating PgP encryption strategy");
+                provider = new PgPProvider();
+                break;
+            case "AESNoPaddingProvider":
+                LOGGER.info(">>Instantiating AES No padding encryption strategy");
+                provider = new AESNoPaddingProvider();
+                break;
+            default:
+                LOGGER.info("ERR: Unknown strategy:{}", EncrConstants.encryptionStrategy);
+                throw new RuntimeException("ERR: Unknown strategy");
+        }
         LOGGER.info(">>Initialization completed.");
     }
 

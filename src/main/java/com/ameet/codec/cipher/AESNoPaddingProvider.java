@@ -1,15 +1,17 @@
-package com.anthem.codec.cipher;
+package com.ameet.codec.cipher;
 
-import com.anthem.codec.config.EncrConstants;
+import com.ameet.codec.config.EncrConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -24,6 +26,7 @@ public class AESNoPaddingProvider implements EncryptDecrypt {
     private SecretKeySpec secretKeySpec;
     private Cipher cipherInstance;
     private OutputStream outputStream;
+    private InputStream inputStream;
 
     public AESNoPaddingProvider() {
         byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -41,12 +44,15 @@ public class AESNoPaddingProvider implements EncryptDecrypt {
         return "AES/CFB8/NoPadding";
     }
 
-    public void decipherStream() {
+    @Override
+    public InputStream decipherStream(InputStream in) {
         try {
             cipherInstance.init(Cipher.DECRYPT_MODE, secretKeySpec, ivspec);
         } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
             throw new RuntimeException("invalid key", e);
         }
+        inputStream = new CipherInputStream(in, cipherInstance);
+        return inputStream;
     }
 
     @Override

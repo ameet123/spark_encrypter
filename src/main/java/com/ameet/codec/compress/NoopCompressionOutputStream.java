@@ -1,6 +1,6 @@
-package com.anthem.codec.compress;
+package com.ameet.codec.compress;
 
-import com.anthem.codec.cipher.EncryptDecrypt;
+import com.ameet.codec.cipher.EncryptDecrypt;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

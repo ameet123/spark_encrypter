@@ -1,5 +1,6 @@
-package com.anthem.codec.cipher;
+package com.ameet.codec.cipher;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -14,6 +15,14 @@ public interface EncryptDecrypt {
      * @return encrypted stream
      */
     OutputStream cipherStream(OutputStream out);
+
+    /**
+     * decrypt stream
+     *
+     * @param in encrypted using appropriate cipher
+     * @return decrypted
+     */
+    InputStream decipherStream(InputStream in);
 
     /**
      * any end of stream processing required, such as flush and close, can be performed here.

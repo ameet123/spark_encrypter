@@ -1,6 +1,7 @@
-package com.anthem.codec.cipher;
+package com.ameet.codec.cipher;
 
-import com.anthem.codec.config.EncrConstants;
+import com.ameet.codec.config.EncrConstants;
+import com.ameet.codec.util.EncUtil;
 import name.neuhalfen.projects.crypto.bouncycastle.openpgp.BouncyGPG;
 import name.neuhalfen.projects.crypto.bouncycastle.openpgp.keys.callbacks.KeyringConfigCallbacks;
 import name.neuhalfen.projects.crypto.bouncycastle.openpgp.keys.keyrings.InMemoryKeyring;
@@ -11,10 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
@@ -24,24 +23,24 @@ import java.security.SignatureException;
  */
 public class PgPProvider implements EncryptDecrypt {
     private static final Logger LOGGER = LoggerFactory.getLogger(PgPProvider.class);
-    private String PUB_KEY_STR;
+    private String PUB_KEY_STR, PRIV_KEY_STR;
     private OutputStream outputStream;
+    private InputStream inputStream;
 
     public PgPProvider() {
         LOGGER.info(">> Recipient public key from file:{}", EncrConstants.pubKey);
-        try {
-            PUB_KEY_STR =
-                    new String(Files.readAllBytes(Paths.get(getClass().getResource(EncrConstants.pubKey).toURI())));
-        } catch (IOException | URISyntaxException e) {
-            LOGGER.error(">>Cannot read public key:{}", EncrConstants.pubKey);
-            throw new RuntimeException("No Public key", e);
-        }
+        PUB_KEY_STR = EncUtil.fileToString(EncrConstants.pubKey);
+        LOGGER.info(">> Recipient PRIVATE key from file:{}", EncrConstants.privKey);
+        PRIV_KEY_STR = EncUtil.fileToString(EncrConstants.privKey);
+        BouncyGPG.registerProvider();
     }
 
     private InMemoryKeyring keyring() throws IOException, PGPException {
+
         InMemoryKeyring keyring =
                 KeyringConfigs.forGpgExportedKeys(KeyringConfigCallbacks.withPassword(EncrConstants.password));
         keyring.addPublicKey(PUB_KEY_STR.getBytes());
+        keyring.addSecretKey(PRIV_KEY_STR.getBytes());
         return keyring;
     }
 
@@ -63,6 +62,29 @@ public class PgPProvider implements EncryptDecrypt {
             throw new RuntimeException(e);
         }
         return outputStream;
+    }
+
+    @Override
+    public InputStream decipherStream(InputStream in) {
+        try {
+            if (EncrConstants.isSignRequired) {
+                inputStream = BouncyGPG
+                        .decryptAndVerifyStream()
+                        .withConfig(keyring())
+                        .andValidateSomeoneSigned()
+                        .fromEncryptedInputStream(in);
+            } else {
+                inputStream = BouncyGPG
+                        .decryptAndVerifyStream()
+                        .withConfig(keyring())
+                        .andIgnoreSignatures()
+                        .fromEncryptedInputStream(in);
+            }
+        } catch (IOException | NoSuchProviderException | PGPException e) {
+            LOGGER.error("ERR: Pgp decryption of stream", e);
+            throw new RuntimeException(e);
+        }
+        return inputStream;
     }
 
     @Override

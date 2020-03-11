@@ -1,4 +1,4 @@
-package com.anthem.codec;
+package com.ameet.codec;
 
 public class TestUtil {
     public static final String MSG = "    Looking back on a childhood filled with events and memories, I find it rather " +

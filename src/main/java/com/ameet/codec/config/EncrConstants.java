@@ -1,4 +1,4 @@
-package com.anthem.codec.config;
+package com.ameet.codec.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,14 +8,18 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class EncrConstants {
-    public static final String PROP_FILE = "application.properties";
-    public static final String PASSWORD_KEY = "password";
-    public static final String EXT_KEY = "extension";
+    private static final String PROP_FILE = "application.properties";
+    private static final String PASSWORD_KEY = "password";
+    private static final String EXT_KEY = "extension";
+    private static final String IS_SIGN_KEY = "decrypt_w_signing";
+    private static final String ENCR_STRAT_KEY = "encrypt_strategy";
     private static final Logger LOGGER = LoggerFactory.getLogger(EncrConstants.class);
     public static String password;
     public static String extension;
-    public static String pubKey;
+    public static String pubKey, privKey;
     public static String recipient;
+    public static String encryptionStrategy;
+    public static boolean isSignRequired;
 
     static {
         LOGGER.info(">>Reading properties from :{}", PROP_FILE);
@@ -30,7 +34,10 @@ public class EncrConstants {
         password = properties.getProperty(EncrConstants.PASSWORD_KEY);
         extension = properties.getProperty(EncrConstants.EXT_KEY);
         pubKey = properties.getProperty("public_key");
+        privKey = properties.getProperty("private_key");
+        isSignRequired = Boolean.parseBoolean(properties.getProperty(IS_SIGN_KEY));
         recipient = properties.getProperty("recipient");
-        LOGGER.info(">>Encrypted file extension:{}", extension);
+        encryptionStrategy = properties.getProperty(ENCR_STRAT_KEY);
+        LOGGER.info(">>Encryption Strategy:{} Encrypted file extension:{}", encryptionStrategy, extension);
     }
 }
