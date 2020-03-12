@@ -13,6 +13,7 @@ public class EncUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(EncUtil.class);
 
     public static String fileToString(String filename) {
+        LOGGER.info(">>Reading file:{}", filename);
         try (InputStream propertyStream = EncrConstants.class.getClassLoader().getResourceAsStream(filename)) {
             assert propertyStream != null;
             return IOUtils.toString(propertyStream, StandardCharsets.UTF_8);
