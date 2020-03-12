@@ -5,6 +5,10 @@ Encrypt a spark `DataFrame` **before** writing to disk/file.
 ### Background:
 In certain scenarios, it may not be allowed to persist the dataframe to disk even temporarily. This may be prohibited
  due to some regulations. 
+
+#### Why not individual column encryption thr' Spark Transforms?
+Well, that is a simpler approach. However, there may be use cases where the data is shipped out and the recipient may
+ be working with another technology and may want to just decrypt the entire file before loading it.
  
 ### Approach:
 Currently, no option exists on `DataFrameWriter` to encrypt the data frame being generated. However, there is an
