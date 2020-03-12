@@ -27,13 +27,12 @@ public class PgPProvider implements EncryptDecrypt {
     private OutputStream outputStream;
     private InputStream inputStream;
     private BufferedOutputStream bufferedOutputStream;
+
     public PgPProvider() {
-        LOGGER.info(">> Recipient public key from file:{}", EncrConstants.pubKey);
+        LOGGER.info(">> Recipient public key from file: {}", EncrConstants.pubKey);
         PUB_KEY_STR = EncUtil.fileToString(EncrConstants.pubKey);
-//        PUB_KEY_STR = EncrConstants.P_KEY;
-        LOGGER.info(">> Recipient PRIVATE key from file:{}", EncrConstants.privKey);
+        LOGGER.info(">> Recipient PRIVATE key from file: {}", EncrConstants.privKey);
         PRIV_KEY_STR = EncUtil.fileToString(EncrConstants.privKey);
-//        PRIV_KEY_STR = EncrConstants.PR_KEY;
         BouncyGPG.registerProvider();
     }
 
@@ -48,7 +47,8 @@ public class PgPProvider implements EncryptDecrypt {
 
     @Override
     public OutputStream cipherStream(OutputStream out) {
-          bufferedOutputStream = new BufferedOutputStream(out);
+        LOGGER.info(">>Generating cipher stream");
+        bufferedOutputStream = new BufferedOutputStream(out);
         outputStream = null;
         try {
             outputStream = BouncyGPG
