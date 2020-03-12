@@ -1,20 +1,22 @@
 package com.ameet.codec.util;
 
+import com.ameet.codec.config.EncrConstants;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class EncUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(EncUtil.class);
 
     public static String fileToString(String filename) {
-        try {
-            return new String(Files.readAllBytes(Paths.get(EncUtil.class.getResource(filename).toURI())));
-        } catch (IOException | URISyntaxException e) {
+        try (InputStream propertyStream = EncrConstants.class.getClassLoader().getResourceAsStream(filename)) {
+            assert propertyStream != null;
+            return IOUtils.toString(propertyStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
             LOGGER.error("ERR: can't read file from classpath:{}", filename, e);
             throw new RuntimeException(e);
         }

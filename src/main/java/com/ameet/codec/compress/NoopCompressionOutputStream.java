@@ -15,6 +15,11 @@ public class NoopCompressionOutputStream extends CompressionOutputStream {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoopCompressionOutputStream.class);
     private EncryptDecrypt encryptDecrypt;
 
+    /**
+     * Provider instance is required in order to close the stream
+     * @param out output stream to perform compression on
+     * @param encryptDecrypt  provider instance
+     */
     public NoopCompressionOutputStream(OutputStream out, EncryptDecrypt encryptDecrypt) {
         super(out);
         this.encryptDecrypt = encryptDecrypt;
